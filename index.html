@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Reporte de Visita I.E.</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: una sola columna para el pulgar; formulario arriba, mensaje tal como saldrá abajo, barra de envío fija al pie. */
+:root{
+  --bg:#eef1ec; --surface:#ffffff; --ink:#16241f; --muted:#5b6b64; --line:#cdd6cf;
+  --accent:#0d5c63; --accent-ink:#ffffff; --chip:#e1e8e2; --send:#128a4b; --send-ink:#ffffff; --warn:#9a5b00;
+  --display:"Archivo",system-ui,sans-serif; --body:"Atkinson Hyperlegible",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1715; --surface:#18231f; --ink:#e8efea; --muted:#9bada5; --line:#2e3d37;
+  --accent:#5fc4cc; --accent-ink:#06201f; --chip:#22302b; --send:#2fbf71; --send-ink:#04170c; --warn:#f0b454; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1715; --surface:#18231f; --ink:#e8efea; --muted:#9bada5; --line:#2e3d37;
+  --accent:#5fc4cc; --accent-ink:#06201f; --chip:#22302b; --send:#2fbf71; --send-ink:#04170c; --warn:#f0b454; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:20px 150px}
+main{max-width:560px;margin-inline:auto;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-direction:column;gap:4px}
+h1{font-family:var(--display);font-weight:800;font-size:1.6rem;line-height:1.1;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted)}
+h2{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin:0}
+section{display:flex;flex-direction:column;gap:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid>*{min-width:0}
+.full{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:var(--muted);font-weight:700}
+input,textarea{font:inherit;font-weight:400;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px;width:100%;min-height:48px}
+textarea{min-height:84px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-weight:700;font-size:.9rem;color:var(--ink);background:var(--chip);border:1.5px solid transparent;border-radius:999px;padding:10px 14px;min-height:44px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:14px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.link{font:inherit;font-weight:700;color:var(--accent);background:none;border:0;padding:10px 0;text-align:left;cursor:pointer;text-decoration:underline;min-height:44px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar-in{max-width:560px;margin-inline:auto;display:flex;flex-direction:column;gap:8px}
+#falta{font-size:.82rem;color:var(--warn);font-weight:700;margin:0;min-height:1.2em}
+.acts{display:flex;gap:10px}
+.send{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:1.05rem;text-decoration:none;color:var(--send-ink);background:var(--send);border-radius:12px;min-height:54px;padding:0 14px;text-align:center}
+.copy{font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--ink);background:var(--chip);border:0;border-radius:12px;min-height:54px;padding:0 16px;cursor:pointer}
+</style>
+
+<main>
+  <header>
+    <h1>Reporte de visita</h1>
+    <p>Llena lo de este colegio y envíalo al grupo. Fecha, día y hora ya están puestos.</p>
+  </header>
+
+  <section>
+    <h2>Resultado</h2>
+    <div class="chips" id="resChips">
+      <button type="button" class="chip" aria-pressed="false">Sí obtuvimos ingreso</button>
+      <button type="button" class="chip" aria-pressed="false">No obtuvimos ingreso</button>
+      <button type="button" class="chip" aria-pressed="false">Visita reprogramada</button>
+    </div>
+    <label>Resultado de la visita
+      <input id="resultado" placeholder="Toca una opción o escribe el tuyo">
+    </label>
+  </section>
+
+  <section>
+    <h2>Colegio</h2>
+    <div class="grid">
+      <label class="full">I.E. (los colegios ya visitados se completan solos)
+        <input id="ie" list="colegios" placeholder="Nombre del colegio" autocomplete="off">
+        <datalist id="colegios"></datalist>
+      </label>
+      <label>N° de visita <input id="numero" inputmode="numeric"></label>
+      <label>Celular <input id="celular" inputmode="tel"></label>
+      <label class="full">Director(a) <input id="director"></label>
+      <label class="full">Dirección <input id="direccion"></label>
+      <label class="full">Referencia <input id="referencia"></label>
+    </div>
+    <div class="chips" id="nivChips">
+      <button type="button" class="chip" aria-pressed="false">Inicial</button>
+      <button type="button" class="chip" aria-pressed="false">Primaria</button>
+      <button type="button" class="chip" aria-pressed="false">Secundaria</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Números del día</h2>
+    <div class="grid">
+      <label>Total de docentes <input id="docentes" inputmode="numeric" placeholder="0"></label>
+      <label>Venta <input id="venta" inputmode="numeric" placeholder="0"></label>
+      <label>Movilidad <input id="movilidad" inputmode="decimal" placeholder="0"></label>
+      <label>PSI <input id="psi"></label>
+      <label class="full">Observación <textarea id="observacion" placeholder="Ej.: se han cambiado de sede"></textarea></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Datos fijos (se guardan en este celular)</h2>
+    <div class="grid">
+      <label class="full">Asesor(a) <input id="asesor"></label>
+      <label>Zona <input id="zona"></label>
+      <label>UGEL <input id="ugel"></label>
+      <label>Fecha <input id="fecha" type="date"></label>
+      <label>Hora <input id="hora" type="time"></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Así saldrá el mensaje</h2>
+    <pre id="preview"></pre>
+    <button type="button" class="link" id="nueva">Empezar otra visita (limpia el colegio y sube el N°)</button>
+  </section>
+</main>
+
+<div class="bar"><div class="bar-in">
+  <p id="falta"></p>
+  <div class="acts">
+    <a class="send" id="wa" href="https://wa.me/" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+    <button type="button" class="copy" id="copiar">Copiar</button>
+  </div>
+</div></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var FIJOS=['asesor','zona','ugel'];
+  var VISITA=['resultado','ie','numero','celular','director','direccion','referencia','docentes','venta','movilidad','psi','observacion'];
+  var COLE=['director','celular','direccion','referencia'];
+  var DIAS=['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
+  var niveles=[];
+  function get(k,d){try{var v=localStorage.getItem('rv_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+  function set(k,v){try{localStorage.setItem('rv_'+k,JSON.stringify(v))}catch(e){}}
+  function up(id){return ($(id).value||'').trim().toUpperCase()}
+  function pad(n){return String(n).padStart(2,'0')}
+
+  // valores iniciales
+  var now=new Date();
+  $('fecha').value=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  $('hora').value=pad(now.getHours())+':'+pad(now.getMinutes());
+  var fijos=get('fijos',{asesor:'MILTON LLACSAHUANGA YANAYACO',zona:'SULLANA',ugel:'SULLANA'});
+  FIJOS.forEach(function(f){$(f).value=fijos[f]||''});
+  var draft=get('draft',{});
+  VISITA.forEach(function(f){if(draft[f])$(f).value=draft[f]});
+  niveles=draft.niveles||[];
+  if(!$('numero').value)$('numero').value=get('n',1);
+  var colegios=get('colegios',{});
+
+  function pintaColegios(){
+    $('colegios').innerHTML='';
+    Object.keys(colegios).forEach(function(k){var o=document.createElement('option');o.value=k;$('colegios').appendChild(o)});
+  }
+  function pintaChips(){
+    Array.prototype.forEach.call($('nivChips').children,function(b){b.setAttribute('aria-pressed',niveles.indexOf(b.textContent)>-1?'true':'false')});
+    Array.prototype.forEach.call($('resChips').children,function(b){b.setAttribute('aria-pressed',b.textContent.toUpperCase()===up('resultado')?'true':'false')});
+  }
+  function texto(){
+    var p=$('fecha').value.split('-'), dia='', fecha='';
+    if(p.length===3){var d=new Date(+p[0],+p[1]-1,+p[2]);dia=DIAS[d.getDay()];fecha=p[2]+'/'+p[1]+'/'+p[0].slice(2)}
+    var h=$('hora').value.split(':'), hora='';
+    if(h.length===2){var hh=+h[0];hora=((hh%12)||12)+':'+h[1]+' '+(hh<12?'AM':'PM')}
+    return [
+      'RESULTADO DE LA VISITA: '+up('resultado'),
+      'N° '+up('numero'),
+      'I.E: '+up('ie'),
+      'DIRECTOR(A): '+up('director'),
+      'CELULAR: '+up('celular'),
+      'DIA: '+dia,
+      'FECHA: '+fecha,
+      'HORA: '+hora,
+      'NIVELES: '+niveles.join(', ').toUpperCase(),
+      'TOTAL DE DOCENTES: '+(up('docentes')||'0'),
+      'DIRECCIÓN: '+up('direccion'),
+      'REFERENCIA: '+up('referencia'),
+      'ZONA: '+up('zona'),
+      'UGEL: '+up('ugel'),
+      'MOVILIDAD: '+(up('movilidad')||'0'),
+      'VENTA: '+(up('venta')||'0'),
+      'ASESOR(A): '+up('asesor'),
+      'PSI: '+up('psi'),
+      '',
+      'OBSERVACIÓN: '+up('observacion'),
+      'GRUPO MARKETING'
+    ].join('\n');
+  }
+  function refresca(){
+    var t=texto();
+    $('preview').textContent=t;
+    $('wa').href='https://wa.me/?text='+encodeURIComponent(t);
+    var f=[];
+    if(!up('resultado'))f.push('resultado');
+    if(!up('ie'))f.push('I.E.');
+    if(!up('asesor'))f.push('asesor');
+    $('falta').textContent=f.length?'Falta: '+f.join(', '):'';
+    pintaChips();
+    var d={niveles:niveles};VISITA.forEach(function(k){d[k]=$(k).value});set('draft',d);
+    var fx={};FIJOS.forEach(function(k){fx[k]=$(k).value});set('fijos',fx);
+  }
+  function guardaColegio(){
+    var k=up('ie');if(!k)return;
+    var c={niveles:niveles.slice()};COLE.forEach(function(f){c[f]=$(f).value});
+    colegios[k]=c;set('colegios',colegios);pintaColegios();
+  }
+
+  document.addEventListener('input',function(e){
+    if(e.target.id==='ie'){
+      var c=colegios[up('ie')];
+      if(c){COLE.forEach(function(f){$(f).value=c[f]||''});niveles=(c.niveles||[]).slice()}
+    }
+    refresca();
+  });
+  $('resChips').addEventListener('click',function(e){
+    if(e.target.classList.contains('chip')){$('resultado').value=e.target.textContent;refresca()}
+  });
+  $('nivChips').addEventListener('click',function(e){
+    if(!e.target.classList.contains('chip'))return;
+    var n=e.target.textContent,i=niveles.indexOf(n);
+    if(i>-1)niveles.splice(i,1);else niveles.push(n);
+    var orden=['Inicial','Primaria','Secundaria'];
+    niveles.sort(function(a,b){return orden.indexOf(a)-orden.indexOf(b)});
+    refresca();
+  });
+  $('wa').addEventListener('click',guardaColegio);
+  $('copiar').addEventListener('click',function(){
+    guardaColegio();
+    var b=$('copiar'), t=texto();
+    function ok(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar'},1800)}
+    function sel(){var r=document.createRange();r.selectNodeContents($('preview'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Seleccionado';setTimeout(function(){b.textContent='Copiar'},1800)}
+    try{navigator.clipboard.writeText(t).then(ok,sel)}catch(e){sel()}
+  });
+  $('nueva').addEventListener('click',function(){
+    guardaColegio();
+    var n=(parseInt($('numero').value,10)||0)+1;
+    VISITA.forEach(function(f){$(f).value=''});
+    niveles=[];$('numero').value=n;set('n',n);
+    var d=new Date();$('hora').value=pad(d.getHours())+':'+pad(d.getMinutes());
+    refresca();window.scrollTo(0,0);
+  });
+
+  pintaColegios();refresca();
+})();
+</script>
+
+</html>
