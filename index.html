@@ -37,6 +37,13 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font:inherit;font-weight:700;font-size:.9rem;color:var(--ink);background:var(--chip);border:1.5px solid transparent;border-radius:999px;padding:10px 14px;min-height:44px;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tab{font-family:var(--display);font-weight:700;font-size:1rem;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;min-height:50px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.panel{display:flex;flex-direction:column;gap:22px}
+input:disabled{opacity:.45}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+#aviso{margin:0;font-size:.85rem;font-weight:700;color:var(--warn)}
 pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:14px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .link{font:inherit;font-weight:700;color:var(--accent);background:none;border:0;padding:10px 0;text-align:left;cursor:pointer;text-decoration:underline;min-height:44px}
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
@@ -49,9 +56,16 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
 
 <main>
   <header>
-    <h1>Reporte de visita</h1>
-    <p>Llena lo de este colegio y envíalo al grupo. Fecha, día y hora ya están puestos.</p>
+    <h1>Reportes de campo</h1>
+    <p>Elige qué vas a reportar, llena los datos y envíalo al grupo. Fecha, día y hora ya están puestos.</p>
   </header>
+
+  <div class="tabs">
+    <button type="button" class="tab" id="tabVisita" aria-pressed="true">Visita a colegio</button>
+    <button type="button" class="tab" id="tabVenta" aria-pressed="false">Cierre de venta</button>
+  </div>
+
+  <div class="panel" id="pVisita">
 
   <section>
     <h2>Resultado</h2>
@@ -87,6 +101,7 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
 
   <section>
     <h2>Números del día</h2>
+    <p id="aviso" hidden>Sin ingreso: docentes, venta, niveles y PSI quedan bloqueados. Docentes y venta salen como CERO.</p>
     <div class="grid">
       <label>Total de docentes <input id="docentes" inputmode="numeric" placeholder="0"></label>
       <label>Venta <input id="venta" inputmode="numeric" placeholder="0"></label>
@@ -95,6 +110,57 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
       <label class="full">Observación <textarea id="observacion" placeholder="Ej.: se han cambiado de sede"></textarea></label>
     </div>
   </section>
+
+  </div>
+
+  <div class="panel" id="pVenta" hidden>
+  <section>
+    <h2>Programa</h2>
+    <div class="grid">
+      <label class="full">Programa de estudio (los ya usados se completan solos)
+        <input id="v_programa" list="programas" autocomplete="off" placeholder="Ej.: Especialización Educación Inclusiva de Calidad">
+        <datalist id="programas"></datalist>
+      </label>
+      <label class="full">Estrategia <input id="v_estrategia"></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Docente</h2>
+    <div class="grid">
+      <label class="full">Nombre completo <input id="v_nombre" autocomplete="off"></label>
+      <label>DNI <input id="v_dni" inputmode="numeric" maxlength="8" autocomplete="off"></label>
+      <label>Celular <input id="v_cel" inputmode="numeric" maxlength="9" autocomplete="off"></label>
+      <label class="full">Correo electrónico <input id="v_correo" type="email" inputmode="email" autocomplete="off"></label>
+      <label class="full">I.E. <input id="v_ie" list="colegios" autocomplete="off"></label>
+    </div>
+    <div class="chips" data-for="v_desempeno">
+      <button type="button" class="chip" aria-pressed="false">Docente</button>
+      <button type="button" class="chip" aria-pressed="false">Director</button>
+      <button type="button" class="chip" aria-pressed="false">Auxiliar</button>
+    </div>
+    <label>Desempeño <input id="v_desempeno" placeholder="Toca una opción o escribe otro"></label>
+    <div class="chips" data-for="v_condicion">
+      <button type="button" class="chip" aria-pressed="false">Nombrado</button>
+      <button type="button" class="chip" aria-pressed="false">Contratado</button>
+    </div>
+    <label>Condición laboral <input id="v_condicion" placeholder="Toca una opción o escribe otra"></label>
+  </section>
+
+  <section>
+    <h2>Pago</h2>
+    <div class="chips" data-for="v_pago">
+      <button type="button" class="chip" aria-pressed="false">Pago directo</button>
+      <button type="button" class="chip" aria-pressed="false">Descuento por planilla</button>
+    </div>
+    <div class="grid">
+      <label class="full">Modalidad de pago <input id="v_pago" placeholder="Toca una opción o escribe otra"></label>
+      <label class="full">Suscripción <input id="v_suscripcion"></label>
+      <label class="full">Beneficiario <input id="v_beneficiario"></label>
+      <label class="full">Observación <textarea id="v_obs"></textarea></label>
+    </div>
+  </section>
+  </div>
 
   <section>
     <h2>Datos fijos (se guardan en este celular)</h2>
@@ -110,7 +176,7 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   <section>
     <h2>Así saldrá el mensaje</h2>
     <pre id="preview"></pre>
-    <button type="button" class="link" id="nueva">Empezar otra visita (limpia el colegio y sube el N°)</button>
+    <button type="button" class="link" id="nueva"></button>
   </section>
 </main>
 
@@ -129,7 +195,9 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   var VISITA=['resultado','ie','numero','celular','director','direccion','referencia','docentes','venta','movilidad','psi','observacion'];
   var COLE=['director','celular','direccion','referencia'];
   var DIAS=['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
+  var VENTA=['v_programa','v_estrategia','v_nombre','v_dni','v_cel','v_correo','v_ie','v_desempeno','v_condicion','v_pago','v_suscripcion','v_beneficiario','v_obs'];
   var niveles=[];
+  var modo='visita';
   function get(k,d){try{var v=localStorage.getItem('rv_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
   function set(k,v){try{localStorage.setItem('rv_'+k,JSON.stringify(v))}catch(e){}}
   function up(id){return ($(id).value||'').trim().toUpperCase()}
@@ -146,20 +214,59 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   niveles=draft.niveles||[];
   if(!$('numero').value)$('numero').value=get('n',1);
   var colegios=get('colegios',{});
+  var programas=get('programas',[]);
+  var draftV=get('draftV',{});
+  VENTA.forEach(function(f){if(draftV[f])$(f).value=draftV[f]});
+  modo=get('modo','visita')==='venta'?'venta':'visita';
 
   function pintaColegios(){
     $('colegios').innerHTML='';
     Object.keys(colegios).forEach(function(k){var o=document.createElement('option');o.value=k;$('colegios').appendChild(o)});
+    $('programas').innerHTML='';
+    programas.forEach(function(k){var o=document.createElement('option');o.value=k;$('programas').appendChild(o)});
   }
   function pintaChips(){
+    Array.prototype.forEach.call(document.querySelectorAll('.chips[data-for]'),function(g){
+      var v=up(g.getAttribute('data-for'));
+      Array.prototype.forEach.call(g.children,function(b){b.setAttribute('aria-pressed',b.textContent.toUpperCase()===v?'true':'false')});
+    });
     Array.prototype.forEach.call($('nivChips').children,function(b){b.setAttribute('aria-pressed',niveles.indexOf(b.textContent)>-1?'true':'false')});
     Array.prototype.forEach.call($('resChips').children,function(b){b.setAttribute('aria-pressed',b.textContent.toUpperCase()===up('resultado')?'true':'false')});
   }
-  function texto(){
+  function sinIngreso(){return ['NO OBTUVIMOS INGRESO','VISITA REPROGRAMADA'].indexOf(up('resultado'))>-1}
+  function cuando(sep){
     var p=$('fecha').value.split('-'), dia='', fecha='';
-    if(p.length===3){var d=new Date(+p[0],+p[1]-1,+p[2]);dia=DIAS[d.getDay()];fecha=p[2]+'/'+p[1]+'/'+p[0].slice(2)}
+    if(p.length===3){var d=new Date(+p[0],+p[1]-1,+p[2]);dia=DIAS[d.getDay()];fecha=p[2]+sep+p[1]+sep+p[0].slice(2)}
     var h=$('hora').value.split(':'), hora='';
     if(h.length===2){var hh=+h[0];hora=((hh%12)||12)+':'+h[1]+' '+(hh<12?'AM':'PM')}
+    return {dia:dia,fecha:fecha,hora:hora};
+  }
+  function textoVenta(){
+    var c=cuando('-');
+    return [
+      '\uD83D\uDCCD ASESOR: '+up('asesor'),
+      '\uD83D\uDCCD DIA Y FECHA: '+c.dia+' '+c.fecha+' HORA: '+c.hora,
+      'VENTA GRUPO MARKETING',
+      'ESTRATEGIA: '+up('v_estrategia'),
+      'PROGRAMA DE ESTUDIO: '+up('v_programa'),
+      '\u2705 NOMBRE COMPLETO: '+up('v_nombre'),
+      '\u2705 DNI: '+up('v_dni'),
+      '\u2705 DESEMPEÑO: '+up('v_desempeno'),
+      '\u2705 UGEL: '+up('ugel'),
+      '\u2705 CEL: '+up('v_cel'),
+      '\u2705 CORREO ELECTRÓNICO: '+($('v_correo').value||'').trim().toLowerCase(),
+      '- CONDICIÓN LABORAL: '+up('v_condicion'),
+      '- I.E: '+up('v_ie'),
+      '\u2705 SUSCRIPCION: '+(up('v_suscripcion')||'----------'),
+      '\u2705 MODALIDAD DE PAGO: '+up('v_pago'),
+      '\u2705 *BENEFICIARIO*: '+up('v_beneficiario'),
+      'OBSERVACIÓN: '+up('v_obs')
+    ].join('\n');
+  }
+  function texto(){
+    if(modo==='venta')return textoVenta();
+    var sin=sinIngreso();
+    var c=cuando('/'), dia=c.dia, fecha=c.fecha, hora=c.hora;
     return [
       'RESULTADO DE LA VISITA: '+up('resultado'),
       'N° '+up('numero'),
@@ -170,13 +277,13 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
       'FECHA: '+fecha,
       'HORA: '+hora,
       'NIVELES: '+niveles.join(', ').toUpperCase(),
-      'TOTAL DE DOCENTES: '+(up('docentes')||'0'),
+      'TOTAL DE DOCENTES: '+(sin?'CERO':(up('docentes')||'0')),
       'DIRECCIÓN: '+up('direccion'),
       'REFERENCIA: '+up('referencia'),
       'ZONA: '+up('zona'),
       'UGEL: '+up('ugel'),
       'MOVILIDAD: '+(up('movilidad')||'0'),
-      'VENTA: '+(up('venta')||'0'),
+      'VENTA: '+(sin?'CERO':(up('venta')||'0')),
       'ASESOR(A): '+up('asesor'),
       'PSI: '+up('psi'),
       '',
@@ -185,21 +292,40 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     ].join('\n');
   }
   function refresca(){
+    var sin=sinIngreso();
+    ['docentes','venta','psi'].forEach(function(id){$(id).disabled=sin;if(sin)$(id).value=''});
+    Array.prototype.forEach.call($('nivChips').children,function(b){b.disabled=sin});
+    if(sin)niveles=[];
+    $('aviso').hidden=!sin;
     var t=texto();
     $('preview').textContent=t;
     $('wa').href='https://wa.me/?text='+encodeURIComponent(t);
+    var venta=modo==='venta';
+    $('pVisita').hidden=venta;$('pVenta').hidden=!venta;
+    $('tabVisita').setAttribute('aria-pressed',venta?'false':'true');
+    $('tabVenta').setAttribute('aria-pressed',venta?'true':'false');
+    $('nueva').textContent=venta?'Empezar otra venta (limpia los datos del docente)':'Empezar otra visita (limpia el colegio y sube el N°)';
+    ['v_dni','v_cel'].forEach(function(id){var v=$(id).value.replace(/\D/g,'');if(v!==$(id).value)$(id).value=v});
     var f=[];
-    if(!up('resultado'))f.push('resultado');
-    if(!up('ie'))f.push('I.E.');
+    if(venta){
+      if(!up('v_programa'))f.push('programa');
+      if(!up('v_nombre'))f.push('nombre');
+      if($('v_dni').value.length!==8)f.push('DNI de 8 dígitos');
+      if($('v_cel').value&&$('v_cel').value.length!==9)f.push('celular de 9 dígitos');
+    }else{
+      if(!up('resultado'))f.push('resultado');
+      if(!up('ie'))f.push('I.E.');
+    }
     if(!up('asesor'))f.push('asesor');
     $('falta').textContent=f.length?'Falta: '+f.join(', '):'';
+    var dv={};VENTA.forEach(function(k){dv[k]=$(k).value});set('draftV',dv);set('modo',modo);
     pintaChips();
     var d={niveles:niveles};VISITA.forEach(function(k){d[k]=$(k).value});set('draft',d);
     var fx={};FIJOS.forEach(function(k){fx[k]=$(k).value});set('fijos',fx);
   }
   function guardaColegio(){
     var k=up('ie');if(!k)return;
-    var c={niveles:niveles.slice()};COLE.forEach(function(f){c[f]=$(f).value});
+    var c={niveles:(sinIngreso()&&colegios[k])?(colegios[k].niveles||[]):niveles.slice()};COLE.forEach(function(f){c[f]=$(f).value});
     colegios[k]=c;set('colegios',colegios);pintaColegios();
   }
 
@@ -209,6 +335,23 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
       if(c){COLE.forEach(function(f){$(f).value=c[f]||''});niveles=(c.niveles||[]).slice()}
     }
     refresca();
+  });
+  function alEnviar(){
+    if(modo!=='venta'){guardaColegio();return}
+    var pr=up('v_programa');
+    if(pr&&programas.indexOf(pr)<0){programas.push(pr);set('programas',programas);pintaColegios()}
+  }
+  function setModo(m){
+    modo=m;
+    if(m==='venta'&&!$('v_ie').value)$('v_ie').value=$('ie').value;
+    refresca();
+  }
+  $('tabVisita').addEventListener('click',function(){setModo('visita')});
+  $('tabVenta').addEventListener('click',function(){setModo('venta')});
+  Array.prototype.forEach.call(document.querySelectorAll('.chips[data-for]'),function(g){
+    g.addEventListener('click',function(e){
+      if(e.target.classList.contains('chip')){$(g.getAttribute('data-for')).value=e.target.textContent;refresca()}
+    });
   });
   $('resChips').addEventListener('click',function(e){
     if(e.target.classList.contains('chip')){$('resultado').value=e.target.textContent;refresca()}
@@ -221,15 +364,21 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     niveles.sort(function(a,b){return orden.indexOf(a)-orden.indexOf(b)});
     refresca();
   });
-  $('wa').addEventListener('click',guardaColegio);
+  $('wa').addEventListener('click',alEnviar);
   $('copiar').addEventListener('click',function(){
-    guardaColegio();
+    alEnviar();
     var b=$('copiar'), t=texto();
     function ok(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar'},1800)}
     function sel(){var r=document.createRange();r.selectNodeContents($('preview'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Seleccionado';setTimeout(function(){b.textContent='Copiar'},1800)}
     try{navigator.clipboard.writeText(t).then(ok,sel)}catch(e){sel()}
   });
   $('nueva').addEventListener('click',function(){
+    if(modo==='venta'){
+      alEnviar();
+      ['v_nombre','v_dni','v_cel','v_correo','v_desempeno','v_condicion','v_pago','v_suscripcion','v_beneficiario','v_obs'].forEach(function(f){$(f).value=''});
+      var dn=new Date();$('hora').value=pad(dn.getHours())+':'+pad(dn.getMinutes());
+      refresca();window.scrollTo(0,0);return;
+    }
     guardaColegio();
     var n=(parseInt($('numero').value,10)||0)+1;
     VISITA.forEach(function(f){$(f).value=''});
