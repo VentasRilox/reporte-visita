@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Panel Comercial UGEL</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: una columna en celular, tarjetas de UGEL en rejilla en pantalla ancha; resumen arriba, detalle por pestañas. */
+:root{
+  --bg:#eef1ec; --surface:#ffffff; --ink:#16241f; --muted:#5b6b64; --line:#cdd6cf;
+  --accent:#0d5c63; --accent-ink:#ffffff; --chip:#e1e8e2;
+  --ok:#12733f; --ok-bg:#dcefe2; --warn:#8a5200; --warn-bg:#f6e7c8; --crit:#a3271c; --crit-bg:#f6dcd8;
+  --display:"Archivo",system-ui,sans-serif; --body:"Atkinson Hyperlegible",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1715; --surface:#18231f; --ink:#e8efea; --muted:#9bada5; --line:#2e3d37;
+  --accent:#5fc4cc; --accent-ink:#06201f; --chip:#22302b;
+  --ok:#6fd39a; --ok-bg:#16382a; --warn:#f0b454; --warn-bg:#3d2f12; --crit:#ff9a8c; --crit-bg:#45201b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1715; --surface:#18231f; --ink:#e8efea; --muted:#9bada5; --line:#2e3d37;
+  --accent:#5fc4cc; --accent-ink:#06201f; --chip:#22302b;
+  --ok:#6fd39a; --ok-bg:#16382a; --warn:#f0b454; --warn-bg:#3d2f12; --crit:#ff9a8c; --crit-bg:#45201b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:20px 48px}
+main{max-width:1040px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
+h1{font-family:var(--display);font-weight:800;font-size:1.6rem;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin:0}
+h3{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0;line-height:1.15}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+section{display:flex;flex-direction:column;gap:12px}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.top>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex-direction:row!important}
+input,button{font:inherit}
+input{color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;max-width:100%}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{font-family:var(--display);font-weight:700;color:var(--accent-ink);background:var(--accent);border:0;border-radius:10px;min-height:46px;padding:0 18px;cursor:pointer}
+.btn.sec{color:var(--ink);background:var(--chip)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.tab{font-family:var(--display);font-weight:700;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;min-height:46px;padding:0 16px;cursor:pointer;white-space:nowrap}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.banner{background:var(--warn-bg);color:var(--warn);font-weight:700;border-radius:10px;padding:10px 14px;font-size:.9rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi b{font-family:var(--display);font-weight:800;font-size:1.7rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.8rem;color:var(--muted);font-weight:700}
+.kpi small{font-size:.8rem;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row>*{min-width:0}
+.num{font-family:var(--display);font-weight:800;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.num small{font-size:.95rem;font-weight:700;color:var(--muted)}
+.track{height:12px;background:var(--chip);border-radius:6px;overflow:hidden;position:relative}
+.track i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.track u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.pill{display:inline-block;font-size:.76rem;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;flex-shrink:0}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.crit{background:var(--crit-bg);color:var(--crit)}
+.pill.neu{background:var(--chip);color:var(--muted)}
+.funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.funnel div{background:var(--bg);border-radius:8px;padding:8px 4px;min-width:0}
+.funnel b{display:block;font-family:var(--display);font-weight:800;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.funnel span{font-size:.7rem;color:var(--muted);font-weight:700}
+.scroll{overflow-x:auto;background:var(--surface);border:1.5px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{font-weight:700;background:var(--bg)}
+.list{list-style:none;margin:0;padding:0;background:var(--surface);border:1.5px solid var(--line);border-radius:12px}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list li>span{min-width:0;overflow-wrap:anywhere}
+.list small{display:block;color:var(--muted);font-size:.82rem}
+.login{max-width:440px;margin-inline:auto;display:flex;flex-direction:column;gap:14px;padding-top:24px}
+.login input{width:100%}
+.err{color:var(--crit);font-weight:700;font-size:.9rem;min-height:1.3em}
+.demo{display:flex;flex-wrap:wrap;gap:8px}
+</style>
+
+<main id="app"></main>
+
+<script>
+(function(){
+  var API='https://script.google.com/macros/s/AKfycbx6YHaERFofkpWkX81TwELqRySn6IYgpTj-QxF03ycKs-AD3U4XLtIBDJl-JyXe0pjt/exec';  // dirección del sistema (Apps Script). Vacía: el panel solo muestra datos de ejemplo.
+  var VALOR=1860, BASICO={ASESOR:1230,SUPERVISOR:1500};
+  var NOING=['NO OBTUVIMOS INGRESO','VISITA REPROGRAMADA'];
+  var app=document.getElementById('app'), D=null, tab='resumen', error='', cargando=false;
+  function lsGet(k){try{return localStorage.getItem('pc_'+k)||''}catch(e){return ''}}
+  function lsSet(k,v){try{v?localStorage.setItem('pc_'+k,v):localStorage.removeItem('pc_'+k)}catch(e){}}
+  var codigo=lsGet('codigo');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function pad(n){return String(n).padStart(2,'0')}
+  function soles(n){return 'S/ '+Math.round(n).toLocaleString('en-US')}
+  function fcorta(f){var p=String(f).split('-');return p.length===3?p[2]+'/'+p[1]:f}
+  function titulo(s){return String(s).toLowerCase().replace(/(^|\s)\S/g,function(c){return c.toUpperCase()})}
+  function fecha(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+  function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function habiles(a,b){var d=fecha(a),e=fecha(b),n=0;for(;d<=e;d.setDate(d.getDate()+1)){var w=d.getDay();if(w>0&&w<6)n++}return n}
+
+  // reglas del negocio
+  function caida(v){return /CA[IÍ]D|ANULAD/i.test(v.estado||'')}
+  function valida(v){return !caida(v)&&/NOMBRAD/i.test(v.cond||'')&&/PLANILLA/i.test(v.pago||'')}
+  function premioAsesor(n){return n>=40?3800:n>=30?1800:n>=20?800:n>=15?300:0}
+  function bonoSup(n){return n>=60?2000:n>=40?1000:0}
+  function pagoJefe(total,en60){return total>=6?3000+300*en60:total===5?3000+400*en60:2000+500*en60}
+
+  function calcula(){
+    var mes=D.mes, p=mes.split('-'), ult=new Date(+p[0],+p[1],0).getDate(), fin=mes+'-'+pad(ult);
+    var ref=D.hoy.slice(0,7)===mes?D.hoy:(D.hoy<mes+'-01'?mes+'-01':fin);
+    var habTot=habiles(mes+'-01',fin), habHechos=D.hoy<mes+'-01'?0:habiles(mes+'-01',ref);
+    var lunes=fecha(ref);lunes.setDate(lunes.getDate()-((lunes.getDay()+6)%7));lunes=iso(lunes);
+    var C={ref:ref,avance:habTot?habHechos/habTot:0,habQuedan:habiles(ref,fin),lunes:lunes,ugel:{},asesor:{},tot:nuevo()};
+    function nuevo(){return {val:0,rev:0,cai:0,sem:0,hoy:0,vis:0,ing:0,doc:0,mov:0,visHoy:0,ult:''}}
+    D.ugeles.forEach(function(g){C.ugel[g.nombre]=Object.assign(nuevo(),{nombre:g.nombre,meta:g.meta})});
+    D.personas.forEach(function(a){if(a.rol==='ASESOR')C.asesor[a.nombre]=Object.assign(nuevo(),{nombre:a.nombre,ugel:a.ugel,meta:a.meta||20})});
+    function suma(r,fn){
+      var g=C.ugel[r.ugel]||(C.ugel[r.ugel]=Object.assign(nuevo(),{nombre:r.ugel,meta:60}));
+      var a=C.asesor[r.asesor]||(C.asesor[r.asesor]=Object.assign(nuevo(),{nombre:r.asesor,ugel:r.ugel,meta:20}));
+      [g,a,C.tot].forEach(function(o){fn(o);if(r.f>o.ult)o.ult=r.f});
+    }
+    D.ventas.forEach(function(v){suma(v,function(o){
+      if(caida(v))o.cai++;else if(valida(v)){o.val++;if(v.f>=lunes&&v.f<=ref)o.sem++;if(v.f===ref)o.hoy++}else o.rev++;
+    })});
+    D.visitas.forEach(function(v){suma(v,function(o){
+      o.vis++;if(NOING.indexOf(String(v.res).toUpperCase())<0)o.ing++;o.doc+=v.doc||0;o.mov+=v.mov||0;if(v.f===ref)o.visHoy++;
+    })});
+    C.ugeles=Object.keys(C.ugel).map(function(k){return C.ugel[k]});
+    C.asesores=Object.keys(C.asesor).map(function(k){return C.asesor[k]}).sort(function(a,b){return a.ugel.localeCompare(b.ugel)||b.val-a.val});
+    C.tot.meta=C.ugeles.reduce(function(s,g){return s+g.meta},0);
+    return C;
+  }
+  function estado(val,meta,avance){
+    if(!meta)return ['neu','Sin meta'];
+    if(val>=meta)return ['ok','Meta cumplida'];
+    var esp=meta*avance;
+    if(esp<1)return ['neu','Inicio de mes'];
+    return val>=esp*0.9?['ok','En ritmo']:val>=esp*0.6?['warn','Atrasada']:['crit','Muy atrasada'];
+  }
+  function pill(e){return '<span class="pill '+e[0]+'">'+esc(e[1])+'</span>'}
+  function barra(val,meta,avance){
+    return '<div class="track"><i style="width:'+Math.min(100,meta?val/meta*100:0)+'%"></i><u style="left:'+Math.min(100,avance*100)+'%"></u></div>';
+  }
+  function kpi(t,v,s){return '<div class="kpi"><span>'+esc(t)+'</span><b>'+esc(v)+'</b>'+(s?'<small>'+esc(s)+'</small>':'')+'</div>'}
+  function pct(a,b){return b?Math.round(a/b*100)+'%':'–'}
+
+  function vResumen(C){
+    var rol=D.usuario.rol, t=C.tot, h='';
+    h+='<section><h2>Avance del mes</h2><div class="kpis">'
+      +kpi('Ventas válidas',t.val+' de '+t.meta,'Docente nombrado con descuento por planilla')
+      +kpi('Esta semana',t.sem,'Meta semanal: '+15*C.ugeles.length)
+      +kpi('Por revisar',t.rev,'No cumplen nombrado y planilla')
+      +(rol==='SUPERVISOR'?kpi('Mi bono del mes',soles(C.ugeles.reduce(function(s,g){return s+bonoSup(g.val)},0)),'40 ventas: S/ 1,000 · 60 ventas: S/ 2,000 por UGEL')
+                          :kpi('Valor contratado',soles(t.val*VALOR),'S/ 1,860 por venta válida'))
+      +'</div></section>';
+    h+='<section><h2>UGEL</h2><div class="cards">';
+    C.ugeles.forEach(function(g){
+      var faltan=Math.max(0,g.meta-g.val), sup=D.personas.filter(function(x){return x.rol==='SUPERVISOR'&&x.ugeles.indexOf(g.nombre)>-1})[0];
+      h+='<div class="card"><div class="row"><h3>'+esc(titulo(g.nombre))+'</h3>'+pill(estado(g.val,g.meta,C.avance))+'</div>'
+        +'<div class="num">'+g.val+' <small>/ '+g.meta+' ventas</small></div>'+barra(g.val,g.meta,C.avance)
+        +'<p class="small muted">'+(faltan?'Faltan '+faltan+' en '+C.habQuedan+' días hábiles: '+(Math.ceil(faltan/Math.max(1,C.habQuedan)*10)/10)+' por día.':'Todo lo que se cierre ahora es extra.')
+        +' Semana: '+g.sem+' de 15.</p>'
+        +'<div class="funnel"><div><b>'+g.vis+'</b><span>Visitas</span></div><div><b>'+pct(g.ing,g.vis)+'</b><span>Con ingreso</span></div><div><b>'+g.doc+'</b><span>Docentes</span></div><div><b>'+g.val+'</b><span>Ventas</span></div></div>'
+        +(rol!=='SUPERVISOR'?'<p class="small muted">Supervisor: '+esc(sup?titulo(sup.nombre):'por contratar')+'</p>':'')
+        +'</div>';
+    });
+    if(!C.ugeles.length)h+='<p class="muted">Todavía no hay UGEL registradas en la hoja "UGEL".</p>';
+    h+='</div><p class="small muted">La marca negra de cada barra es donde debería ir la UGEL hoy según los días hábiles del mes.</p></section>';
+    return h;
+  }
+  function vEquipo(C){
+    var h='<section><h2>Asesores</h2><div class="scroll"><table><tr><th>Asesor</th><th>UGEL</th><th class="n">Ventas</th><th class="n">Semana</th><th class="n">Visitas hoy</th><th class="n">Por revisar</th><th>Último reporte</th><th>Estado</th></tr>';
+    C.asesores.forEach(function(a){
+      var e=!a.ult?['crit','Sin reportes']:a.ult<C.ref&&fecha(C.ref).getDay()%6!==0?['warn','Sin reporte hoy']:estado(a.val,a.meta,C.avance);
+      h+='<tr><td>'+esc(titulo(a.nombre))+'</td><td>'+esc(titulo(a.ugel))+'</td><td class="n">'+a.val+' / '+a.meta+'</td><td class="n">'+a.sem+'</td><td class="n">'+a.visHoy+'</td><td class="n">'+a.rev+'</td><td>'+(a.ult?fcorta(a.ult):'–')+'</td><td>'+pill(e)+'</td></tr>';
+    });
+    if(!C.asesores.length)h+='<tr><td colspan="8" class="muted">Aún no hay asesores. Agrégalos en la hoja "Usuarios" con rol ASESOR.</td></tr>';
+    h+='</table></div></section>';
+    var volver={};D.visitas.slice().sort(function(a,b){return a.f<b.f?-1:1}).forEach(function(v){volver[v.ugel+'|'+v.ie]=v});
+    var pend=Object.keys(volver).map(function(k){return volver[k]}).filter(function(v){return NOING.indexOf(String(v.res).toUpperCase())>-1});
+    h+='<section><h2>Colegios por volver</h2><ul class="list">';
+    pend.forEach(function(v){h+='<li><span>'+esc(v.ie)+'<small>'+esc(titulo(v.ugel))+' · '+esc(titulo(v.asesor))+' · '+esc(titulo(v.res))+' el '+fcorta(v.f)+(v.obs?' · '+esc(v.obs):'')+'</small></span></li>'});
+    if(!pend.length)h+='<li><span class="muted">Ningún colegio pendiente. Aquí aparecen los que quedaron sin ingreso o reprogramados.</span></li>';
+    h+='</ul></section>';
+    var hoy=D.visitas.filter(function(v){return v.f===C.ref});
+    h+='<section><h2>Visitas del '+fcorta(C.ref)+'</h2><ul class="list">';
+    hoy.forEach(function(v){var si=NOING.indexOf(String(v.res).toUpperCase())<0;h+='<li><span>'+esc(v.ie)+'<small>'+esc(titulo(v.asesor))+' · '+esc(v.h||'')+' · '+v.doc+' docentes</small></span><span class="pill '+(si?'ok':'warn')+'">'+(si?'Con ingreso':'Sin ingreso')+'</span></li>'});
+    if(!hoy.length)h+='<li><span class="muted">Sin visitas registradas en esta fecha.</span></li>';
+    h+='</ul></section>';
+    return h;
+  }
+  function vVentas(C){
+    var h='<section><h2>Ventas del mes</h2><div class="scroll"><table><tr><th>Fecha</th><th>Docente</th><th>I.E.</th><th>UGEL</th><th>Asesor</th><th>Programa</th><th>Estado</th></tr>';
+    D.ventas.slice().sort(function(a,b){return a.f<b.f?1:-1}).forEach(function(v){
+      var e=caida(v)?['crit','Caída']:valida(v)?['ok','Válida']:['warn',!/NOMBRAD/i.test(v.cond||'')?'No nombrado':'Sin planilla'];
+      h+='<tr><td>'+fcorta(v.f)+'</td><td>'+esc(titulo(v.nom))+'</td><td>'+esc(v.ie)+'</td><td>'+esc(titulo(v.ugel))+'</td><td>'+esc(titulo(v.asesor))+'</td><td>'+esc(titulo(v.prog||''))+'</td><td>'+pill(e)+'</td></tr>';
+    });
+    if(!D.ventas.length)h+='<tr><td colspan="7" class="muted">Todavía no hay ventas registradas este mes.</td></tr>';
+    h+='</table></div><p class="small muted">Válida: docente nombrado con descuento por planilla. Para marcar una venta caída, escribe CAÍDA en la columna ESTADO de la hoja "Ventas".</p></section>';
+    return h;
+  }
+  function vDinero(C){
+    var filas=[], tAs=0, tMov=0, tSup=0;
+    C.asesores.forEach(function(a){tAs+=BASICO.ASESOR+premioAsesor(a.val);tMov+=a.mov});
+    var sups=D.personas.filter(function(x){return x.rol==='SUPERVISOR'});
+    sups.forEach(function(s){tSup+=BASICO.SUPERVISOR+s.ugeles.reduce(function(t,g){return t+(C.ugel[g]?bonoSup(C.ugel[g].val):0)},0)});
+    var en60=C.ugeles.filter(function(g){return g.val>=60}).length, jefe=pagoJefe(C.ugeles.length,en60);
+    var costo=tAs+tMov+tSup+jefe, valor=C.tot.val*VALOR;
+    var h='<section><h2>Dinero del mes</h2><div class="kpis">'
+      +kpi('Valor contratado',soles(valor),C.tot.val+' ventas válidas × S/ 1,860')
+      +kpi('Costo del equipo',soles(costo),'Básicos, premios, bonos y movilidad')
+      +kpi('Costo sobre lo contratado',valor?(costo/valor*100).toFixed(1)+'%':'–','Meta del plan: cerca de 11%')
+      +kpi('Ventas caídas',C.tot.cai,pct(C.tot.cai,C.tot.cai+C.tot.val+C.tot.rev)+' de las registradas')
+      +'</div></section>';
+    h+='<section><h2>Costo del equipo</h2><div class="scroll"><table><tr><th>Concepto</th><th>Detalle</th><th class="n">Monto</th></tr>'
+      +'<tr><td>'+C.asesores.length+' asesores</td><td>Básico S/ 1,230 más premio por ventas válidas</td><td class="n">'+soles(tAs)+'</td></tr>'
+      +'<tr><td>'+sups.length+' supervisores</td><td>Básico S/ 1,500 más bono por UGEL en 40 o 60</td><td class="n">'+soles(tSup)+'</td></tr>'
+      +'<tr><td>Jefe de ventas</td><td>'+C.ugeles.length+' UGEL, '+en60+' en 60 ventas</td><td class="n">'+soles(jefe)+'</td></tr>'
+      +'<tr><td>Movilidad</td><td>La que reportaron los asesores en sus visitas</td><td class="n">'+soles(tMov)+'</td></tr>'
+      +'<tr class="total"><td>Total</td><td></td><td class="n">'+soles(costo)+'</td></tr></table></div>'
+      +'<p class="small muted">Estimación con la escala acordada. No incluye cargas de planilla (EsSalud, gratificaciones, CTS) ni premios en especie.</p></section>';
+    h+='<section><h2>Premio por asesor</h2><div class="scroll"><table><tr><th>Asesor</th><th>UGEL</th><th class="n">Ventas válidas</th><th class="n">Premio</th><th class="n">Movilidad</th></tr>';
+    C.asesores.forEach(function(a){h+='<tr><td>'+esc(titulo(a.nombre))+'</td><td>'+esc(titulo(a.ugel))+'</td><td class="n">'+a.val+'</td><td class="n">'+soles(premioAsesor(a.val))+'</td><td class="n">'+soles(a.mov)+'</td></tr>'});
+    h+='</table></div></section>';
+    return h;
+  }
+
+  var TABS={SUPERVISOR:[['resumen','Resumen'],['equipo','Mi equipo'],['ventas','Ventas']],
+            JEFE:[['resumen','Resumen'],['equipo','Equipo'],['ventas','Ventas'],['dinero','Dinero']],
+            DUENO:[['resumen','Resumen'],['ventas','Ventas'],['dinero','Dinero']]};
+  var ROL={SUPERVISOR:'Supervisor',JEFE:'Jefe de ventas',DUENO:'Gerencia'};
+
+  function pinta(){
+    if(!D){
+      app.innerHTML='<div class="login"><h1>Panel comercial</h1><p class="muted">Para supervisores, jefe de ventas y gerencia. Ingresa con el código que te dieron.</p>'
+        +'<input id="cod" placeholder="Tu código" autocomplete="off" autocapitalize="characters" value="'+esc(codigo)+'">'
+        +'<button class="btn" id="entrar">'+(cargando?'Cargando…':'Entrar')+'</button><p class="err">'+esc(error)+'</p>'
+        +'<h2>Ver con datos de ejemplo</h2><div class="demo"><button class="btn sec" data-demo="SUPERVISOR">Supervisor</button><button class="btn sec" data-demo="JEFE">Jefe de ventas</button><button class="btn sec" data-demo="DUENO">Gerencia</button></div></div>';
+      return;
+    }
+    var C=calcula(), rol=D.usuario.rol, tabs=TABS[rol]||TABS.DUENO;
+    if(!tabs.some(function(t){return t[0]===tab}))tab='resumen';
+    var h='<div class="top"><div><h2>'+esc(ROL[rol]||rol)+'</h2><h1>'+esc(titulo(D.usuario.nombre))+'</h1><p class="muted small">Datos al '+fcorta(D.hoy)+(rol==='SUPERVISOR'&&D.usuario.ugeles.length?' · UGEL '+esc(D.usuario.ugeles.map(titulo).join(' y ')):'')+'</p></div>'
+      +'<div class="ctrl"><input type="month" id="mes" aria-label="Mes" value="'+esc(D.mes)+'"><button class="btn sec" id="act">'+(cargando?'Cargando…':'Actualizar')+'</button><button class="btn sec" id="salir">Salir</button></div></div>';
+    if(D.demo)h+='<p class="banner">Datos de ejemplo. Los nombres y las cifras no son reales: sirven para ver cómo se verá el panel cuando el equipo empiece a reportar.</p>';
+    if(error)h+='<p class="err">'+esc(error)+'</p>';
+    h+='<div class="tabs">'+tabs.map(function(t){return '<button class="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===tab)+'">'+t[1]+'</button>'}).join('')+'</div>';
+    h+=tab==='equipo'?vEquipo(C):tab==='ventas'?vVentas(C):tab==='dinero'?vDinero(C):vResumen(C);
+    app.innerHTML=h;
+  }
+
+  function carga(mes){
+    if(D&&D.demo){D=demo(D.usuario.rol,mes);pinta();return}
+    if(!API){error='El panel todavía no está conectado al sistema. Mira los datos de ejemplo.';pinta();return}
+    cargando=true;error='';pinta();
+    fetch(API+'?accion=panel&codigo='+encodeURIComponent(codigo)+(mes?'&mes='+mes:''))
+      .then(function(r){return r.json()})
+      .then(function(j){cargando=false;if(j.ok){D=j;lsSet('codigo',codigo)}else{error=j.error||'No se pudo entrar';if(!D)lsSet('codigo','')}pinta()})
+      .catch(function(){cargando=false;error='Sin conexión con el sistema. Revisa tu internet y vuelve a intentar.';pinta()});
+  }
+
+  // datos de ejemplo, fijos, para mostrar el panel antes de tener reportes reales
+  function demo(rol){
+    var s=7;function rnd(){s=(s*16807)%2147483647;return s/2147483647}
+    var G=[['PIURA',30,.95],['SULLANA',30,.7],['TUMBES',20,.9],['PAITA',10,.5],['TALARA',10,1.1]];
+    var sup={PIURA:'Supervisor Uno (ejemplo)',SULLANA:'Supervisor Dos (ejemplo)',TUMBES:'Supervisor Tres (ejemplo)',PAITA:'Supervisor Cuatro (ejemplo)',TALARA:'Supervisor Cuatro (ejemplo)'};
+    if(rol==='SUPERVISOR')G=G.slice(3);
+    var d={ok:true,demo:true,hoy:'2026-10-22',mes:'2026-10',usuario:{nombre:rol==='SUPERVISOR'?'Supervisor Cuatro (ejemplo)':rol==='JEFE'?'Guillermo Alvarado Dávila':'Gerencia',rol:rol,ugeles:rol==='SUPERVISOR'?['PAITA','TALARA']:[]},ugeles:[],personas:[],visitas:[],ventas:[]};
+    var vistos={};
+    G.forEach(function(g){
+      d.ugeles.push({nombre:g[0],meta:g[1]});
+      if(!vistos[sup[g[0]]]){vistos[sup[g[0]]]=1;d.personas.push({nombre:sup[g[0]],rol:'SUPERVISOR',ugel:g[0],ugeles:Object.keys(sup).filter(function(k){return sup[k]===sup[g[0]]}),meta:0})}
+      for(var a=1;a<=3;a++){
+        var nom='Asesor '+a+' '+titulo(g[0])+' (ejemplo)';
+        d.personas.push({nombre:nom,rol:'ASESOR',ugel:g[0],ugeles:[g[0]],meta:Math.round(g[1]/3)});
+        var inicio=g[0]==='TUMBES'?12:(g[0]==='PAITA'||g[0]==='TALARA')?19:5;
+        for(var dia=inicio;dia<=22;dia++){
+          var f='2026-10-'+pad(dia),w=fecha(f).getDay();if(w===0||w===6)continue;
+          if(a===3&&g[0]==='SULLANA'&&dia>19)continue;
+          for(var k=0;k<3;k++){
+            var si=rnd()<.7;
+            d.visitas.push({f:f,h:(8+k*2)+':30 AM',asesor:nom,ugel:g[0],ie:'I.E. '+(14000+Math.floor(rnd()*900))+' (ejemplo)',res:si?'SÍ OBTUVIMOS INGRESO':rnd()<.5?'NO OBTUVIMOS INGRESO':'VISITA REPROGRAMADA',doc:si?4+Math.floor(rnd()*14):0,mov:k?0:10+Math.floor(rnd()*10),obs:''});
+          }
+          var n=rnd()<g[2]*(g[1]/3)/(23-inicio)*2.1?1:0;if(rnd()<.12*g[2])n++;
+          for(var j=0;j<n;j++){
+            var x=rnd();
+            d.ventas.push({f:f,h:'11:00 AM',asesor:nom,ugel:g[0],nom:'Docente '+(d.ventas.length+1)+' (ejemplo)',ie:'I.E. '+(14000+Math.floor(rnd()*900)),prog:'Especialización en Educación Inclusiva',cond:x<.1?'CONTRATADO':'NOMBRADO',pago:x>.93?'PAGO DIRECTO':'DESCUENTO POR PLANILLA',estado:x>.86&&x<=.9?'CAÍDA':''});
+          }
+        }
+      }
+    });
+    if(rol!=='SUPERVISOR')d.personas.push({nombre:'Guillermo Alvarado Dávila',rol:'JEFE',ugel:'',ugeles:[],meta:0});
+    return d;
+  }
+
+  app.addEventListener('click',function(e){
+    var t=e.target;
+    if(t.id==='entrar'){codigo=document.getElementById('cod').value.trim().toUpperCase();if(!codigo){error='Escribe tu código.';pinta();return}carga()}
+    else if(t.getAttribute('data-demo')){error='';D=demo(t.getAttribute('data-demo'));tab='resumen';pinta()}
+    else if(t.getAttribute('data-tab')){tab=t.getAttribute('data-tab');pinta()}
+    else if(t.id==='act')carga(D.mes);
+    else if(t.id==='salir'){D=null;codigo='';error='';lsSet('codigo','');pinta()}
+  });
+  app.addEventListener('change',function(e){if(e.target.id==='mes'&&e.target.value&&!D.demo)carga(e.target.value)});
+  app.addEventListener('keydown',function(e){if(e.target.id==='cod'&&e.key==='Enter')document.getElementById('entrar').click()});
+
+  pinta();
+  if(codigo&&API)carga();
+})();
+</script>
+
+</html>
