@@ -37,10 +37,27 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font:inherit;font-weight:700;font-size:.9rem;color:var(--ink);background:var(--chip);border:1.5px solid transparent;border-radius:999px;padding:10px 14px;min-height:44px;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .tab{font-family:var(--display);font-weight:700;font-size:1rem;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;min-height:50px;cursor:pointer}
 .tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .panel{display:flex;flex-direction:column;gap:22px}
+.big{font-family:var(--display);font-weight:800;font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:1rem;font-weight:700;color:var(--muted)}
+.track{height:12px;background:var(--chip);border-radius:6px;overflow:hidden;position:relative}
+.track i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0;width:0}
+.track u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.hint{margin:0;font-size:.9rem;color:var(--muted)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat b{font-family:var(--display);font-weight:800;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted);font-weight:700}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.hist li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.hist li:last-child{border-bottom:0}
+.hist li>span{min-width:0;overflow-wrap:anywhere}
+.hist small{display:block;color:var(--muted);font-size:.8rem}
+.hist .vacio{color:var(--muted);display:block}
+.mini{font:inherit;font-size:.8rem;font-weight:700;color:var(--ink);background:var(--chip);border:0;border-radius:8px;min-height:40px;padding:0 12px;cursor:pointer;flex-shrink:0}
 input:disabled{opacity:.45}
 .chip:disabled{opacity:.4;cursor:not-allowed}
 #aviso{margin:0;font-size:.85rem;font-weight:700;color:var(--warn)}
@@ -61,8 +78,9 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   </header>
 
   <div class="tabs">
-    <button type="button" class="tab" id="tabVisita" aria-pressed="true">Visita a colegio</button>
-    <button type="button" class="tab" id="tabVenta" aria-pressed="false">Cierre de venta</button>
+    <button type="button" class="tab" id="tabVisita" aria-pressed="true">Visita</button>
+    <button type="button" class="tab" id="tabVenta" aria-pressed="false">Venta</button>
+    <button type="button" class="tab" id="tabAvance" aria-pressed="false">Mi avance</button>
   </div>
 
   <div class="panel" id="pVisita">
@@ -162,9 +180,33 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   </section>
   </div>
 
+  <div class="panel" id="pAvance" hidden>
   <section>
+    <h2>Mi meta del mes</h2>
+    <div class="big"><span id="a_mes">0</span> <small>/ <span id="a_meta">30</span> ventas</small></div>
+    <div class="track"><i id="a_bar"></i><u id="a_mark"></u></div>
+    <p class="hint" id="a_ritmo"></p>
+    <label>Mi meta mensual de ventas <input id="meta" inputmode="numeric"></label>
+  </section>
+  <section>
+    <h2>Hoy</h2>
+    <div class="stats" id="a_hoy"></div>
+    <ul class="hist" id="a_lista"></ul>
+  </section>
+  <section>
+    <h2>Colegios por volver</h2>
+    <ul class="hist" id="a_volver"></ul>
+  </section>
+  <section>
+    <h2>Mis ventas del mes</h2>
+    <ul class="hist" id="a_ventas"></ul>
+  </section>
+  </div>
+
+  <section id="secFijos">
     <h2>Datos fijos (se guardan en este celular)</h2>
     <div class="grid">
+      <label class="full">Mi código (te lo da tu supervisor) <input id="codigo" autocomplete="off" autocapitalize="characters"></label>
       <label class="full">Asesor(a) <input id="asesor"></label>
       <label>Zona <input id="zona"></label>
       <label>UGEL <input id="ugel"></label>
@@ -173,8 +215,10 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     </div>
   </section>
 
+  <p class="hint" id="sync" hidden></p>
+
   <section>
-    <h2>Así saldrá el mensaje</h2>
+    <h2 id="prevT">Así saldrá el mensaje</h2>
     <pre id="preview"></pre>
     <button type="button" class="link" id="nueva"></button>
   </section>
@@ -191,7 +235,8 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
-  var FIJOS=['asesor','zona','ugel'];
+  var API='https://script.google.com/macros/s/AKfycbx6YHaERFofkpWkX81TwELqRySn6IYgpTj-QxF03ycKs-AD3U4XLtIBDJl-JyXe0pjt/exec';  // dirección del sistema (Apps Script). Vacía: solo se envía por WhatsApp.
+  var FIJOS=['codigo','asesor','zona','ugel'];
   var VISITA=['resultado','ie','numero','celular','director','direccion','referencia','docentes','venta','movilidad','psi','observacion'];
   var COLE=['director','celular','direccion','referencia'];
   var DIAS=['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
@@ -217,7 +262,41 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   var programas=get('programas',[]);
   var draftV=get('draftV',{});
   VENTA.forEach(function(f){if(draftV[f])$(f).value=draftV[f]});
-  modo=get('modo','visita')==='venta'?'venta':'visita';
+  modo=get('modo','visita');if(['visita','venta','avance'].indexOf(modo)<0)modo='visita';
+  var hist=get('hist',{});
+  $('meta').value=get('meta',30);
+  var HOY=$('fecha').value;
+  var cola=get('cola',[]), subiendo=false;
+  function pintaSync(msg){
+    var s=$('sync');if(!API){s.hidden=true;return}
+    s.hidden=false;
+    s.textContent=msg||(!up('codigo')?'Escribe tu código en "Datos fijos" para que tus reportes se guarden en el sistema.':cola.length?cola.length+(cola.length===1?' reporte por subir. Se envía solo':' reportes por subir. Se envían solos')+' cuando haya internet.':'Tus reportes están guardados en el sistema.');
+  }
+  function encola(it){
+    if(!API)return;
+    cola=cola.filter(function(x){return x.id!==it.id});cola.push(it);set('cola',cola);sube();
+  }
+  function sube(){
+    if(!API||subiendo||!cola.length||!up('codigo')){pintaSync();return}
+    subiendo=true;var lote=cola.slice();
+    fetch(API,{method:'POST',keepalive:true,body:JSON.stringify({codigo:up('codigo'),items:lote})})
+      .then(function(r){return r.json()})
+      .then(function(j){
+        subiendo=false;
+        if(j.ok){cola=cola.filter(function(x){return lote.indexOf(x)<0});set('cola',cola);pintaSync();if(cola.length)sube()}
+        else pintaSync(j.error==='Código no válido'?'Tu código no es válido. Pídelo a tu supervisor.':'No se pudo guardar: '+j.error);
+      })
+      .catch(function(){subiendo=false;pintaSync()});
+  }
+  function miCodigo(){
+    if(!API||!up('codigo'))return;
+    fetch(API+'?accion=yo&codigo='+encodeURIComponent(up('codigo'))).then(function(r){return r.json()}).then(function(j){
+      if(!j.ok){pintaSync('Tu código no es válido. Pídelo a tu supervisor.');return}
+      $('asesor').value=j.nombre;if(j.ugel){$('ugel').value=j.ugel;if(!$('zona').value)$('zona').value=j.ugel}
+      if(j.meta)$('meta').value=j.meta;
+      refresca();sube();
+    }).catch(function(){});
+  }
 
   function pintaColegios(){
     $('colegios').innerHTML='';
@@ -232,6 +311,88 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     });
     Array.prototype.forEach.call($('nivChips').children,function(b){b.setAttribute('aria-pressed',niveles.indexOf(b.textContent)>-1?'true':'false')});
     Array.prototype.forEach.call($('resChips').children,function(b){b.setAttribute('aria-pressed',b.textContent.toUpperCase()===up('resultado')?'true':'false')});
+  }
+  var NOING=['NO OBTUVIMOS INGRESO','VISITA REPROGRAMADA'];
+  function recs(){return Object.keys(hist).map(function(k){var r=hist[k];r.k=k;return r}).sort(function(a,b){return a.ts-b.ts})}
+  function fcorta(f){var p=f.split('-');return p[2]+'/'+p[1]+'/'+p[0].slice(2)}
+  function habiles(desde,hasta){ // días lunes a viernes entre dos fechas ISO, ambos incluidos
+    var a=desde.split('-'),b=hasta.split('-'),d=new Date(+a[0],+a[1]-1,+a[2]),e=new Date(+b[0],+b[1]-1,+b[2]),n=0;
+    for(;d<=e;d.setDate(d.getDate()+1)){var w=d.getDay();if(w>0&&w<6)n++}
+    return n;
+  }
+  function resumen(){
+    var mes=HOY.slice(0,7), p=HOY.split('-'), ult=new Date(+p[0],+p[1],0).getDate();
+    var o={ventasMes:0,ventasHoy:0,visHoy:0,ingHoy:0,docHoy:0,movHoy:0,meta:parseInt($('meta').value,10)||30};
+    recs().forEach(function(r){
+      if(r.t==='S'){if(r.f.slice(0,7)===mes)o.ventasMes++;if(r.f===HOY)o.ventasHoy++}
+      else if(r.f===HOY){o.visHoy++;if(NOING.indexOf(r.res)<0)o.ingHoy++;o.docHoy+=r.doc||0;o.movHoy+=r.mov||0}
+    });
+    o.habTot=habiles(mes+'-01',mes+'-'+pad(ult));
+    o.habHechos=habiles(mes+'-01',HOY);
+    o.habQuedan=habiles(HOY,mes+'-'+pad(ult));
+    return o;
+  }
+  function textoResumen(){
+    var o=resumen(),p=HOY.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]);
+    return [
+      'RESUMEN DEL DÍA: '+DIAS[d.getDay()]+' '+fcorta(HOY),
+      'ASESOR(A): '+up('asesor'),
+      'COLEGIOS VISITADOS: '+o.visHoy,
+      'CON INGRESO: '+o.ingHoy,
+      'DOCENTES CONVERSADOS: '+o.docHoy,
+      'VENTAS DE HOY: '+o.ventasHoy,
+      'MOVILIDAD: '+o.movHoy,
+      'VENTAS DEL MES: '+o.ventasMes+' DE '+o.meta,
+      'GRUPO MARKETING'
+    ].join('\n');
+  }
+  function li(titulo,detalle,boton){
+    var l=document.createElement('li'),s=document.createElement('span'),m=document.createElement('small');
+    s.textContent=titulo;m.textContent=detalle;s.appendChild(m);l.appendChild(s);
+    if(boton){var b=document.createElement('button');b.type='button';b.className='mini';b.textContent='Quitar';b.setAttribute('data-k',boton);l.appendChild(b)}
+    return l;
+  }
+  function vacio(ul,txt){var l=document.createElement('li'),s=document.createElement('span');s.className='vacio';s.textContent=txt;l.appendChild(s);ul.appendChild(l)}
+  function pintaAvance(){
+    var o=resumen(),all=recs();
+    $('a_mes').textContent=o.ventasMes;$('a_meta').textContent=o.meta;
+    $('a_bar').style.width=Math.min(100,o.ventasMes/o.meta*100)+'%';
+    $('a_mark').style.left=Math.min(100,o.habHechos/o.habTot*100)+'%';
+    var faltan=o.meta-o.ventasMes;
+    $('a_ritmo').textContent=faltan<=0?'Meta cumplida. Todo lo que cierres ahora es extra.':
+      'Te faltan '+faltan+' ventas en '+o.habQuedan+' días hábiles: '+(Math.ceil(faltan/Math.max(1,o.habQuedan)*10)/10)+' por día. La marca negra es donde deberías ir hoy.';
+    var h=$('a_hoy');h.innerHTML='';
+    [['Ventas hoy',o.ventasHoy],['Colegios visitados',o.visHoy+' ('+o.ingHoy+' con ingreso)'],['Docentes conversados',o.docHoy],['Movilidad','S/ '+o.movHoy]].forEach(function(x){
+      var d=document.createElement('div'),sp=document.createElement('span'),b=document.createElement('b');d.className='stat';sp.textContent=x[0];b.textContent=x[1];d.appendChild(sp);d.appendChild(b);h.appendChild(d);
+    });
+    var ul=$('a_lista');ul.innerHTML='';
+    var hoy=all.filter(function(r){return r.f===HOY});
+    hoy.forEach(function(r){
+      ul.appendChild(r.t==='S'?li('Venta · '+r.nom,[r.prog,r.pago,r.h].filter(Boolean).join(' · '),r.k):li('Visita · '+r.ie,[r.res,r.h].filter(Boolean).join(' · '),r.k));
+    });
+    if(!hoy.length)vacio(ul,'Aún no has enviado reportes hoy. Los que envíes desde este celular aparecerán aquí.');
+    var ult={};all.forEach(function(r){if(r.t==='V')ult[r.ie]=r});
+    ul=$('a_volver');ul.innerHTML='';var n=0;
+    Object.keys(ult).forEach(function(k){var r=ult[k];if(NOING.indexOf(r.res)>-1){n++;ul.appendChild(li(r.ie,r.res+' · '+fcorta(r.f)+(r.obs?' · '+r.obs:'')))}});
+    if(!n)vacio(ul,'Ningún colegio pendiente. Aquí aparecen los que quedaron sin ingreso o reprogramados.');
+    ul=$('a_ventas');ul.innerHTML='';
+    var vm=all.filter(function(r){return r.t==='S'&&r.f.slice(0,7)===HOY.slice(0,7)}).reverse();
+    vm.forEach(function(r){ul.appendChild(li(r.nom,[r.prog,r.pago,fcorta(r.f)].filter(Boolean).join(' · ')))});
+    if(!vm.length)vacio(ul,'Todavía no registras ventas este mes.');
+  }
+  function registra(){
+    var f=$('fecha').value,c=cuando('/');
+    if(modo==='visita'){
+      var ie=up('ie');if(!ie||!up('resultado'))return;
+      var sin=sinIngreso();
+      hist['V|'+f+'|'+ie]={t:'V',f:f,h:c.hora,ie:ie,res:up('resultado'),doc:sin?0:(parseInt($('docentes').value,10)||0),mov:parseFloat($('movilidad').value)||0,obs:up('observacion'),ts:Date.now()};
+      encola({t:'V',id:'V|'+f+'|'+ie,f:f,h:c.hora,ie:ie,res:up('resultado'),n:up('numero'),niveles:niveles.join(', ').toUpperCase(),doc:sin?0:(parseInt($('docentes').value,10)||0),venta:sin?0:(up('venta')||0),mov:parseFloat($('movilidad').value)||0,psi:up('psi'),director:up('director'),celular:up('celular'),direccion:up('direccion'),referencia:up('referencia'),zona:up('zona'),ugel:up('ugel'),obs:up('observacion')});
+    }else if(modo==='venta'){
+      var id=$('v_dni').value||up('v_nombre');if(!id)return;
+      hist['S|'+f+'|'+id]={t:'S',f:f,h:c.hora,nom:up('v_nombre'),prog:up('v_programa'),pago:up('v_pago'),ie:up('v_ie'),ts:Date.now()};
+      encola({t:'S',id:'S|'+f+'|'+id,f:f,h:c.hora,nom:up('v_nombre'),dni:$('v_dni').value,cel:$('v_cel').value,correo:($('v_correo').value||'').trim().toLowerCase(),ie:up('v_ie'),desempeno:up('v_desempeno'),condicion:up('v_condicion'),pago:up('v_pago'),prog:up('v_programa'),estrategia:up('v_estrategia'),suscripcion:up('v_suscripcion'),beneficiario:up('v_beneficiario'),ugel:up('ugel'),obs:up('v_obs')});
+    }else return;
+    set('hist',hist);
   }
   function sinIngreso(){return ['NO OBTUVIMOS INGRESO','VISITA REPROGRAMADA'].indexOf(up('resultado'))>-1}
   function cuando(sep){
@@ -265,6 +426,7 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   }
   function texto(){
     if(modo==='venta')return textoVenta();
+    if(modo==='avance')return textoResumen();
     var sin=sinIngreso();
     var c=cuando('/'), dia=c.dia, fecha=c.fecha, hora=c.hora;
     return [
@@ -300,10 +462,16 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     var t=texto();
     $('preview').textContent=t;
     $('wa').href='https://wa.me/?text='+encodeURIComponent(t);
-    var venta=modo==='venta';
-    $('pVisita').hidden=venta;$('pVenta').hidden=!venta;
-    $('tabVisita').setAttribute('aria-pressed',venta?'false':'true');
+    var venta=modo==='venta', av=modo==='avance';
+    $('pVisita').hidden=modo!=='visita';$('pVenta').hidden=!venta;$('pAvance').hidden=!av;
+    $('tabVisita').setAttribute('aria-pressed',modo==='visita'?'true':'false');
     $('tabVenta').setAttribute('aria-pressed',venta?'true':'false');
+    $('tabAvance').setAttribute('aria-pressed',av?'true':'false');
+    $('secFijos').hidden=av;$('nueva').hidden=av;
+    $('prevT').textContent=av?'Resumen del día para enviar':'Así saldrá el mensaje';
+    $('wa').textContent=av?'Enviar resumen':'Enviar por WhatsApp';
+    set('meta',parseInt($('meta').value,10)||30);
+    if(av)pintaAvance();
     $('nueva').textContent=venta?'Empezar otra venta (limpia los datos del docente)':'Empezar otra visita (limpia el colegio y sube el N°)';
     ['v_dni','v_cel'].forEach(function(id){var v=$(id).value.replace(/\D/g,'');if(v!==$(id).value)$(id).value=v});
     var f=[];
@@ -312,14 +480,14 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
       if(!up('v_nombre'))f.push('nombre');
       if($('v_dni').value.length!==8)f.push('DNI de 8 dígitos');
       if($('v_cel').value&&$('v_cel').value.length!==9)f.push('celular de 9 dígitos');
-    }else{
+    }else if(modo==='visita'){
       if(!up('resultado'))f.push('resultado');
       if(!up('ie'))f.push('I.E.');
     }
     if(!up('asesor'))f.push('asesor');
     $('falta').textContent=f.length?'Falta: '+f.join(', '):'';
     var dv={};VENTA.forEach(function(k){dv[k]=$(k).value});set('draftV',dv);set('modo',modo);
-    pintaChips();
+    pintaChips();pintaSync();
     var d={niveles:niveles};VISITA.forEach(function(k){d[k]=$(k).value});set('draft',d);
     var fx={};FIJOS.forEach(function(k){fx[k]=$(k).value});set('fijos',fx);
   }
@@ -337,6 +505,8 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     refresca();
   });
   function alEnviar(){
+    registra();
+    if(modo==='avance')return;
     if(modo!=='venta'){guardaColegio();return}
     var pr=up('v_programa');
     if(pr&&programas.indexOf(pr)<0){programas.push(pr);set('programas',programas);pintaColegios()}
@@ -348,6 +518,12 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
   }
   $('tabVisita').addEventListener('click',function(){setModo('visita')});
   $('tabVenta').addEventListener('click',function(){setModo('venta')});
+  $('tabAvance').addEventListener('click',function(){setModo('avance')});
+  $('a_lista').addEventListener('click',function(e){
+    var b=e.target;if(!b.classList.contains('mini'))return;
+    if(b.textContent==='Quitar'){b.textContent='¿Seguro?';return}
+    delete hist[b.getAttribute('data-k')];set('hist',hist);encola({t:'X',id:b.getAttribute('data-k')});refresca();
+  });
   Array.prototype.forEach.call(document.querySelectorAll('.chips[data-for]'),function(g){
     g.addEventListener('click',function(e){
       if(e.target.classList.contains('chip')){$(g.getAttribute('data-for')).value=e.target.textContent;refresca()}
@@ -387,7 +563,9 @@ pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--s
     refresca();window.scrollTo(0,0);
   });
 
-  pintaColegios();refresca();
+  $('codigo').addEventListener('change',miCodigo);
+  window.addEventListener('online',sube);
+  pintaColegios();refresca();sube();
 })();
 </script>
 
